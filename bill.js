@@ -1,21 +1,25 @@
-const printer = require('printer');
+const printer = require("printer");
 
-const printerName = 'PrinterPort (LPT1)'; 
+function printMessage(message) {
+  const printers = printer.getPrinters();
 
-const textToPrint = 'CZEŚĆ';
+  const selectedPrinter = printers.find((printer) => printer.name === "LPT1");
 
-function printText(text) {
+  if (selectedPrinter) {
     printer.printDirect({
-        data: text,
-        printer: printerName, 
-        type: 'RAW',
-        success: function (jobID) {
-            console.log(`Zadanie wydruku zostało wysłane. ID: ${jobID}`);
-        },
-        error: function (err) {
-            console.error(`Błąd podczas wysyłania zadania wydruku: ${err}`);
-        }
+      data: message,
+      printer: selectedPrinter.name,
+      type: "RAW",
+      success: function (jobID) {
+        console.log(`Wysłano wydruk z ID: ${jobID}`);
+      },
+      error: function (err) {
+        console.error(`Błąd podczas drukowania: ${err}`);
+      },
     });
+  } else {
+    console.error("Drukarka nie została znaleziona.");
+  }
 }
 
-printText(textToPrint);
+printMessage("CZEŚĆ");
