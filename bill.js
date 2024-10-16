@@ -1,31 +1,21 @@
-const printer = require('printer');
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const { exec } = require('child_process');
 
-// Funkcja do drukowania tekstu
-function printText(text) {
-    // Sprawdź dostępne drukarki
-    const printers = printer.getPrinters();
-    
-    // Wybierz drukarkę, która odpowiada Twoim potrzebom
-    const selectedPrinter = printers.find(printer => printer.name.includes('PrinterPort (LPT1)'));
-    
-    if (!selectedPrinter) {
-        console.error('Drukarka nie została znaleziona.');
-        return;
-    }
+const doc = new PDFDocument();
+const filename = 'output.pdf';
+doc.pipe(fs.createWriteStream(filename));
 
-    // Wydrukuj tekst
-    printer.printDirect({
-        data: text,
-        printer: selectedPrinter.name, // Użyj nazwy drukarki
-        type: 'RAW', // Typ danych (RAW)
-        success: function (jobID) {
-            console.log(`Zadanie wydruku o ID: ${jobID} zostało dodane.`);
-        },
-        error: function (err) {
-            console.error(`Błąd podczas drukowania: ${err}`);
+doc.fontSize(25).text('CZEŚĆ', 100, 100);
+doc.end();
+
+doc.on('finish', () => {
+
+    exec(`start acrord32.exe /p /h ${filename}`, (err) => {
+        if (err) {
+            console.error(`Błąd podczas próby drukowania: ${err}`);
+        } else {
+            console.log('Dokument PDF został wydrukowany.');
         }
     });
-}
-
-// Wywołaj funkcję z tekstem do wydruku
-printText('CZEŚĆ');
+});
